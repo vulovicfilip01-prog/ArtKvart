@@ -1,10 +1,35 @@
 import React from 'react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import { notFound } from 'next/navigation';
 import FollowButton from '@/components/FollowButton';
 import ContactModalButton from '@/components/ContactModalButton';
 import ArtistProfileTabs from '@/components/ArtistProfileTabs';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, bio, avatar_url, category')
+    .eq('id', id)
+    .single();
+
+  if (!profile) {
+    return { title: 'Umetnik nije pronađen' };
+  }
+
+  return {
+    title: `${profile.full_name || 'Umetnik'} (${profile.category || 'Portfolio'})`,
+    description: profile.bio || `Pogledajte portfolio umetnika ${profile.full_name} na ArtKvart platformi.`,
+    openGraph: {
+      title: `${profile.full_name || 'Umetnik'} | ArtKvart Portfolio`,
+      description: profile.bio || 'Pogledajte radove i portfolio na ArtKvart-u.',
+      images: profile.avatar_url ? [profile.avatar_url] : [],
+    },
+  };
+}
 
 export default async function ArtistProfile({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -46,6 +71,16 @@ export default async function ArtistProfile({ params }: { params: Promise<{ id: 
     .eq('artist_id', artistId)
     .order('created_at', { ascending: false });
 
+  // Dohvati radove koje je ovaj umetnik lajkovao
+  const { data: likesRows } = await supabase
+    .from('likes')
+    .select('artwork_id, artworks(*)')
+    .eq('user_id', artistId)
+    .order('created_at', { ascending: false });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const likedArtworks = (likesRows || []).map((row: any) => row.artworks).filter(Boolean);
+
   return (
     <main className="main-content" style={{ padding: 0, maxWidth: '100%' }}>
       {/* Cover Photo */}
@@ -69,6 +104,7 @@ export default async function ArtistProfile({ params }: { params: Promise<{ id: 
               <>
                 <FollowButton artistId={artistId} isFollowingInitial={isFollowing} isLoggedIn={!!user} />
                 <ContactModalButton
+                  artistId={artistId}
                   artistName={profile.full_name || 'Korisnik bez imena'}
                   username={profile.username}
                   location={profile.location}
@@ -90,7 +126,7 @@ export default async function ArtistProfile({ params }: { params: Promise<{ id: 
           </div>
         </div>
 
-        <ArtistProfileTabs profile={profile} artworks={artworks || []} />
+        <ArtistProfileTabs profile={profile} artworks={artworks || []} likedArtworks={likedArtworks} />
       </div>
     </main>
   );

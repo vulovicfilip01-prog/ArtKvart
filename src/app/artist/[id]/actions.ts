@@ -47,3 +47,27 @@ export async function toggleFollow(artistId: string) {
   revalidatePath(`/artist/${artistId}`)
   revalidatePath(`/artist/${user.id}`)
 }
+
+export async function sendMessageToArtist(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const receiverId = formData.get('receiverId') as string
+  const senderName = (formData.get('senderName') as string) || user?.user_metadata?.full_name || user?.email || 'Posetilac'
+  const senderEmail = (formData.get('senderEmail') as string) || user?.email || ''
+  const subject = formData.get('subject') as string
+  const content = formData.get('content') as string
+
+  if (!receiverId || !subject?.trim() || !content?.trim()) return
+
+  await supabase.from('messages').insert({
+    sender_id: user?.id || null,
+    receiver_id: receiverId,
+    sender_name: senderName.trim(),
+    sender_email: senderEmail.trim(),
+    subject: subject.trim(),
+    content: content.trim(),
+  })
+
+  revalidatePath('/inbox')
+}

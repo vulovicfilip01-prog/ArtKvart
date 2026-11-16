@@ -1,13 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { sendMessageToArtist } from '@/app/artist/[id]/actions'
 
 export default function ContactModalButton({
+  artistId,
   artistName,
   username,
   location,
   category
 }: {
+  artistId: string
   artistName: string
   username?: string | null
   location?: string | null
@@ -15,18 +18,16 @@ export default function ContactModalButton({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [sent, setSent] = useState(false)
-  const [subject, setSubject] = useState('')
-  const [message, setMessage] = useState('')
+  const [isSending, setIsSending] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!message.trim()) return
+  const handleSubmit = async (formData: FormData) => {
+    setIsSending(true)
+    await sendMessageToArtist(formData)
+    setIsSending(false)
     setSent(true)
     setTimeout(() => {
       setSent(false)
       setIsOpen(false)
-      setSubject('')
-      setMessage('')
     }, 1800)
   }
 
@@ -105,29 +106,50 @@ export default function ContactModalButton({
                   fontSize: '1rem'
                 }}
               >
-                ✓ Poruka je uspešno poslata umetniku {artistName}!
+                ✓ Poruka je poslata u inboks umetnika {artistName}!
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form action={handleSubmit}>
+                <input type="hidden" name="receiverId" value={artistId} />
+
+                <div className="form-group">
+                  <label htmlFor="sender-name">Vaše ime ili studio</label>
+                  <input
+                    id="sender-name"
+                    name="senderName"
+                    type="text"
+                    placeholder="Npr. Marko / Studio Kvart"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="sender-email">Vaš kontakt email</label>
+                  <input
+                    id="sender-email"
+                    name="senderEmail"
+                    type="email"
+                    placeholder="vas@email.com"
+                  />
+                </div>
+
                 <div className="form-group">
                   <label htmlFor="contact-subject">Predmet upita</label>
                   <input
                     id="contact-subject"
+                    name="subject"
                     type="text"
                     required
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
                     placeholder="Npr. Saradnja na projektu / Narudžbina rada"
                   />
                 </div>
+
                 <div className="form-group">
                   <label htmlFor="contact-message">Poruka</label>
                   <textarea
                     id="contact-message"
+                    name="content"
                     rows={4}
                     required
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
                     placeholder={`Zdravo ${artistName}, želeo/la bih da se raspitam o...`}
                     style={{
                       width: '100%',
@@ -147,8 +169,8 @@ export default function ContactModalButton({
                   <button type="button" onClick={() => setIsOpen(false)} className="btn-dark">
                     Otkaži
                   </button>
-                  <button type="submit" className="btn-primary">
-                    Pošalji poruku
+                  <button type="submit" disabled={isSending} className="btn-primary">
+                    {isSending ? 'Slanje...' : 'Pošalji poruku'}
                   </button>
                 </div>
               </form>

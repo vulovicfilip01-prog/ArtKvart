@@ -2,10 +2,39 @@ import { createClient } from '@/utils/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import React from 'react';
+import type { Metadata } from 'next';
 import LikeButton from '@/components/LikeButton';
 import FollowButton from '@/components/FollowButton';
 import DeleteArtworkButton from '@/components/DeleteArtworkButton';
+import EditArtworkModal from '@/components/EditArtworkModal';
 import { postComment, deleteComment } from './actions';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: artwork } = await supabase
+    .from('artworks')
+    .select('title, description, image_url, profiles(full_name)')
+    .eq('id', id)
+    .single();
+
+  if (!artwork) {
+    return { title: 'Rad nije pronađen' };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const artistName = (artwork.profiles as any)?.full_name || 'Umetnik';
+
+  return {
+    title: `${artwork.title} – ${artistName}`,
+    description: artwork.description || `Pogledajte rad "${artwork.title}" autora ${artistName} na platformi ArtKvart.`,
+    openGraph: {
+      title: `${artwork.title} | ArtKvart`,
+      description: artwork.description || `Autor: ${artistName}`,
+      images: artwork.image_url ? [artwork.image_url] : [],
+    },
+  };
+}
 
 export default async function ArtworkPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -52,8 +81,9 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
     .eq('artwork_id', artworkId)
     .order('created_at', { ascending: false });
 
-  // Dummy stats for views
-  const views = Math.floor(Math.random() * 500) + 50;
+  // Pravi brojač pregleda (povećava views_count u bazi za 1)
+  const views = (artwork.views_count || 0) + 1;
+  await supabase.from('artworks').update({ views_count: views }).eq('id', artworkId);
   const isOwner = user?.id === artwork.profiles.id;
 
   return (
@@ -99,14 +129,19 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '0.8rem' }}>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
           <LikeButton 
             artworkId={artwork.id} 
             initialLikes={artwork.likes_count || 0} 
             isLikedInitial={isLikedByMe}
             isLoggedIn={!!user}
           />
-          {isOwner && <DeleteArtworkButton artworkId={artwork.id} />}
+          {isOwner && (
+            <>
+              <EditArtworkModal artwork={artwork} />
+              <DeleteArtworkButton artworkId={artwork.id} />
+            </>
+          )}
         </div>
 
         {/* Stats */}

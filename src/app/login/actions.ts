@@ -28,7 +28,7 @@ export async function signup(formData: FormData) {
   const password = formData.get('password') as string
   const fullName = formData.get('fullName') as string
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -45,6 +45,9 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
+  if (data.session) {
+    redirect('/')
+  }
   redirect('/login?message=' + encodeURIComponent('Proverite Vaš email da potvrdite registraciju (ili se samo prijavite ako ste isključili potvrdu).'))
 }
 

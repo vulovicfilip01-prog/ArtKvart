@@ -4,6 +4,7 @@ import Link from 'next/link';
 import "./globals.css";
 import { createClient } from '@/utils/supabase/server';
 import { signout } from '@/app/login/actions';
+import MobileMenu from '@/components/MobileMenu';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ArtKvart - Mreža Vizuelnih Umetnika",
-  description: "Platforma za umetnike",
+  title: {
+    default: "ArtKvart - Mreža Vizuelnih Umetnika",
+    template: "%s | ArtKvart",
+  },
+  description: "Regionalna platforma za vizuelne umetnike, ilustratore, tatu majstore, grafiti umetnike i dizajnere.",
+  openGraph: {
+    title: "ArtKvart - Mreža Vizuelnih Umetnika",
+    description: "Otkrijte izvanredne radove, povežite se sa vodećim studijima i pronađite talente.",
+    type: "website",
+    locale: "sr_RS",
+  },
 };
 
 export default async function RootLayout({
@@ -40,22 +50,15 @@ export default async function RootLayout({
               Art<span>Kvart</span>
             </Link>
             <div className="nav-dropdowns">
-              <div className="dropdown">
+              <Link href="/" className="dropdown" style={{ textDecoration: 'none' }}>
                 <span>Istraži</span>
-                <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M5 6L0 0h10L5 6z"/></svg>
-              </div>
-              <div className="dropdown">
-                <span>Edukacija</span>
-                <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M5 6L0 0h10L5 6z"/></svg>
-              </div>
-              <div className="dropdown">
-                <span>Karijera</span>
-                <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M5 6L0 0h10L5 6z"/></svg>
-              </div>
-              <div className="dropdown">
+              </Link>
+              <Link href="/artists" className="dropdown" style={{ textDecoration: 'none' }}>
                 <span>Pronađi talente</span>
-                <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M5 6L0 0h10L5 6z"/></svg>
-              </div>
+              </Link>
+              <Link href="/jobs" className="dropdown" style={{ textDecoration: 'none' }}>
+                <span>Karijera i Oglasi</span>
+              </Link>
             </div>
           </div>
           
@@ -69,6 +72,9 @@ export default async function RootLayout({
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <Link href="/upload" className="btn-primary" style={{ textDecoration: 'none', padding: '0.4rem 1rem', fontSize: '0.85rem' }}>
                   <span style={{marginRight: '5px'}}>+</span> Objavi Rad
+                </Link>
+                <Link href="/inbox" className="btn-dark" style={{ textDecoration: 'none', padding: '0.4rem 0.85rem', fontSize: '0.85rem' }}>
+                  Poruke
                 </Link>
                 <Link href={`/artist/${user.id}`} style={{ color: 'var(--text-light)', fontWeight: 600, fontSize: '0.95rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1rem', textDecoration: 'none' }}>
                    {user.user_metadata?.full_name || user.email}
@@ -84,9 +90,60 @@ export default async function RootLayout({
               </>
             )}
           </div>
+
+          <MobileMenu
+            user={
+              user
+                ? {
+                    id: user.id,
+                    email: user.email,
+                    fullName: user.user_metadata?.full_name,
+                  }
+                : null
+            }
+          />
         </nav>
 
-        {children}
+        <div style={{ flex: 1 }}>
+          {children}
+        </div>
+
+        <footer className="site-footer">
+          <div className="footer-inner">
+            <div className="footer-brand-col">
+              <Link href="/" className="nav-brand" style={{ textDecoration: 'none', marginBottom: '0.6rem' }}>
+                <svg viewBox="0 0 24 24" fill="var(--primary-color)" width="24" height="24" style={{ marginRight: 8 }}>
+                  <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13h-13L12 6.5z" />
+                </svg>
+                Art<span>Kvart</span>
+              </Link>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '320px' }}>
+                Regionalna zajednica i portfolio platforma za digitalne, tradicionalne, tattoo i street-art umetnike.
+              </p>
+            </div>
+
+            <div className="footer-links-col">
+              <h4>Platforma</h4>
+              <Link href="/">Istraži radove</Link>
+              <Link href="/artists">Pronađi talente</Link>
+              <Link href="/jobs">Oglasi za posao</Link>
+              <Link href="/upload">Objavi rad</Link>
+            </div>
+
+            <div className="footer-links-col">
+              <h4>Kategorije</h4>
+              <Link href="/?category=Digitalna%20Umetnost">Digitalna Umetnost</Link>
+              <Link href="/?category=Tetova%C5%BEe">Tetovaže</Link>
+              <Link href="/?category=Grafiti">Grafiti i Murali</Link>
+              <Link href="/?category=Tradicionalna">Tradicionalna umetnost</Link>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <span>© {new Date().getFullYear()} ArtKvart. Sva prava zadržana.</span>
+            <span>Napravljeno za umetnike sa Balkana</span>
+          </div>
+        </footer>
       </body>
     </html>
   );

@@ -137,3 +137,59 @@ CREATE POLICY "Users can insert their own comments." ON comments
 CREATE POLICY "Users can delete their own comments." ON comments
   FOR DELETE USING (auth.uid() = user_id);
 
+
+-- 6. Dodavanje kolone za broj pregleda na radovima (ako već ne postoji)
+ALTER TABLE artworks ADD COLUMN IF NOT EXISTS views_count INT DEFAULT 0;
+
+
+-- 7. Kreiranje tabele za Poruke / Upite (Messages - Inboks)
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  sender_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  receiver_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  sender_name TEXT NOT NULL,
+  sender_email TEXT,
+  subject TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view messages sent to them." ON messages
+  FOR SELECT USING (auth.uid() = receiver_id OR auth.uid() = sender_id);
+
+CREATE POLICY "Anyone can send a message to an artist." ON messages
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Receivers can delete their messages." ON messages
+  FOR DELETE USING (auth.uid() = receiver_id);
+
+
+-- 8. Kreiranje tabele za Oglase za posao (Jobs)
+CREATE TABLE IF NOT EXISTS jobs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  company TEXT NOT NULL,
+  location TEXT,
+  job_type TEXT,
+  category TEXT,
+  budget TEXT,
+  contact_email TEXT,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Jobs are viewable by everyone." ON jobs
+  FOR SELECT USING (true);
+
+CREATE POLICY "Authenticated users can post jobs." ON jobs
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own jobs." ON jobs
+  FOR DELETE USING (auth.uid() = user_id);
+
+

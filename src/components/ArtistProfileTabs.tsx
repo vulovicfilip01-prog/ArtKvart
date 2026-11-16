@@ -25,12 +25,14 @@ interface ProfileData {
 
 export default function ArtistProfileTabs({
   profile,
-  artworks
+  artworks,
+  likedArtworks = []
 }: {
   profile: ProfileData
   artworks: ArtworkItem[]
+  likedArtworks?: ArtworkItem[]
 }) {
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'about'>('portfolio')
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'liked' | 'about'>('portfolio')
 
   const totalLikes = artworks.reduce((sum, art) => sum + (art.likes_count || 0), 0)
   const joinedDate = profile.created_at
@@ -54,6 +56,13 @@ export default function ArtistProfileTabs({
         </button>
         <button
           type="button"
+          onClick={() => setActiveTab('liked')}
+          className={`tab ${activeTab === 'liked' ? 'active' : ''}`}
+        >
+          Lajkovano ({likedArtworks.length})
+        </button>
+        <button
+          type="button"
           onClick={() => setActiveTab('about')}
           className={`tab ${activeTab === 'about' ? 'active' : ''}`}
         >
@@ -62,7 +71,7 @@ export default function ArtistProfileTabs({
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'portfolio' ? (
+      {activeTab === 'portfolio' && (
         <div className="gallery-grid" style={{ marginTop: '1.5rem' }}>
           {artworks && artworks.length > 0 ? (
             artworks.map((art) => (
@@ -81,7 +90,30 @@ export default function ArtistProfileTabs({
             <p style={{ color: 'var(--text-muted)' }}>Ovaj umetnik nema objavljenih radova.</p>
           )}
         </div>
-      ) : (
+      )}
+
+      {activeTab === 'liked' && (
+        <div className="gallery-grid" style={{ marginTop: '1.5rem' }}>
+          {likedArtworks && likedArtworks.length > 0 ? (
+            likedArtworks.map((art) => (
+              <Link href={`/artwork/${art.id}`} key={art.id} className="art-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={art.image_url} alt={art.title || 'Art'} className="art-image" />
+                <div className="art-info">
+                  <div className="art-title">{art.title}</div>
+                  <div className="art-artist">
+                    {art.category || 'Rad'} • {art.likes_count || 0} lajkova
+                  </div>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p style={{ color: 'var(--text-muted)' }}>Još uvek nema lajkovanih radova.</p>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'about' && (
         <div
           style={{
             marginTop: '1.5rem',

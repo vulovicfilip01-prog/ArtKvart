@@ -80,6 +80,34 @@ export async function deleteComment(formData: FormData) {
   revalidatePath(`/artwork/${artworkId}`)
 }
 
+export async function updateArtwork(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return
+
+  const artworkId = formData.get('artworkId') as string
+  const title = formData.get('title') as string
+  const category = formData.get('category') as string
+  const description = formData.get('description') as string
+
+  if (!artworkId || !title?.trim()) return
+
+  await supabase
+    .from('artworks')
+    .update({
+      title: title.trim(),
+      category,
+      description: description || ''
+    })
+    .eq('id', artworkId)
+    .eq('artist_id', user.id)
+
+  revalidatePath(`/artwork/${artworkId}`)
+  revalidatePath(`/artist/${user.id}`)
+  revalidatePath('/')
+}
+
 export async function deleteArtwork(artworkId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
