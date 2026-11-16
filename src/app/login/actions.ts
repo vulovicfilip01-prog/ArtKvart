@@ -17,7 +17,15 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    redirect('/login?message=' + encodeURIComponent('Pogrešan email ili lozinka.'))
+    if (error.message?.toLowerCase().includes('email not confirmed')) {
+      redirect(
+        '/login?message=' +
+          encodeURIComponent(
+            'Email adresa nije potvrđena. Kliknite na link u emailu koji vam je stigao ili u Supabase Dashboard-u (Authentication -> Providers -> Email) isključite opciju "Confirm email".'
+          )
+      )
+    }
+    redirect('/login?message=' + encodeURIComponent('Greška pri prijavi: ' + error.message))
   }
 
   if (data.user) {
