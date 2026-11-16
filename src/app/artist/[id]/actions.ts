@@ -1,0 +1,49 @@
+'use server'
+
+import { createClient } from '@/utils/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+export async function toggleFollow(artistId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user || user.id === artistId) return
+
+  // Proveri da li follow već postoji
+  const { data: existingFollow } = await supabase
+    .from('follows')
+    .select('*')
+    .eq('follower_id', user.id)
+    .eq('following_id', artistId)
+    .single()
+
+  const { data: artistProfile } = await supabase
+    .from('profiles')
+    .select('followers_count')
+    .eq('id', artistId)
+    .single()
+
+  const { data: myProfile } = await supabase
+    .from('profiles')
+    .select('following_count')
+    .eq('id', user.id)
+    .single()
+    
+  const currentFollowers = artistProfile?.followers_count || 0
+  const currentFollowing = myProfile?.following_count || 0
+
+  if (existingFollow) {
+    // Unfollow
+    await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', artistId)
+    await supabase.from('profiles').update({ followers_count: Math.max(0, currentFollowers - 1) }).eq('id', artistId)
+    await supabase.from('profiles').update({ following_count: Math.max(0, currentFollowing - 1) }).eq('id', user.id)
+  } else {
+    // Follow
+    await supabase.from('follows').insert({ follower_id: user.id, following_id: artistId })
+    await supabase.from('profiles').update({ followers_count: currentFollowers + 1 }).eq('id', artistId)
+    await supabase.from('profiles').update({ following_count: currentFollowing + 1 }).eq('id', user.id)
+  }
+
+  revalidatePath(`/artist/${artistId}`)
+  revalidatePath(`/artist/${user.id}`)
+}
