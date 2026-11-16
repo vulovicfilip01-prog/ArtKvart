@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import FollowButton from '@/components/FollowButton';
 import ContactModalButton from '@/components/ContactModalButton';
 import ArtistProfileTabs from '@/components/ArtistProfileTabs';
+import ShareButton from '@/components/ShareButton';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -99,7 +100,10 @@ export default async function ArtistProfile({ params }: { params: Promise<{ id: 
           
           <div className="profile-actions">
             {isOwner ? (
-              <Link href="/settings/profile" className="btn-dark" style={{textDecoration: 'none'}}>Uredi profil</Link>
+              <>
+                <Link href="/settings/profile" className="btn-dark" style={{textDecoration: 'none'}}>Uredi profil</Link>
+                <ShareButton title={profile.full_name || 'ArtKvart Portfolio'} />
+              </>
             ) : (
               <>
                 <FollowButton artistId={artistId} isFollowingInitial={isFollowing} isLoggedIn={!!user} />
@@ -110,6 +114,7 @@ export default async function ArtistProfile({ params }: { params: Promise<{ id: 
                   location={profile.location}
                   category={profile.category}
                 />
+                <ShareButton title={profile.full_name || 'ArtKvart Portfolio'} />
               </>
             )}
           </div>

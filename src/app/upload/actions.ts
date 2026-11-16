@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { ensureProfileExists } from '@/utils/supabase/ensureProfile'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -12,6 +13,9 @@ export async function uploadArtwork(formData: FormData) {
   if (!user) {
     redirect('/login')
   }
+
+  // Osiguraj da korisnik ima kreiran profil u tabeli profiles
+  await ensureProfileExists(supabase, user)
 
   const title = formData.get('title') as string
   const category = formData.get('category') as string

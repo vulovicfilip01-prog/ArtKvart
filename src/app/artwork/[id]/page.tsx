@@ -7,6 +7,7 @@ import LikeButton from '@/components/LikeButton';
 import FollowButton from '@/components/FollowButton';
 import DeleteArtworkButton from '@/components/DeleteArtworkButton';
 import EditArtworkModal from '@/components/EditArtworkModal';
+import ShareButton from '@/components/ShareButton';
 import { postComment, deleteComment } from './actions';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -136,6 +137,7 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
             isLikedInitial={isLikedByMe}
             isLoggedIn={!!user}
           />
+          <ShareButton title={artwork.title} />
           {isOwner && (
             <>
               <EditArtworkModal artwork={artwork} />

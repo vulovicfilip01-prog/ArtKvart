@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { updateProfile } from './actions';
+import SubmitButton from '@/components/SubmitButton';
+import ImageUploadInput from '@/components/ImageUploadInput';
 
 export default async function EditProfilePage() {
   const supabase = await createClient();
@@ -55,24 +57,12 @@ export default async function EditProfilePage() {
           </div>
 
           <div className="form-group" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.2rem', marginTop: '1.2rem' }}>
-            <label htmlFor="avatarFile">Profilna slika / Avatar (Otpremi sa računara)</label>
-            {profile?.avatar_url && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={profile.avatar_url}
-                  alt="Trenutni avatar"
-                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.2)' }}
-                />
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Trenutna profilna slika</span>
-              </div>
-            )}
-            <input
-              type="file"
+            <ImageUploadInput
               id="avatarFile"
               name="avatarFile"
-              accept="image/*"
-              style={{ width: '100%', padding: '0.7rem 1rem', backgroundColor: '#000', color: 'var(--text-light)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', marginBottom: '0.6rem' }}
+              label="Profilna slika / Avatar (Otpremi sa računara ili telefona)"
+              initialPreview={profile?.avatar_url}
+              isAvatar={true}
             />
             <input
               type="url"
@@ -80,27 +70,16 @@ export default async function EditProfilePage() {
               name="avatarUrl"
               defaultValue={profile?.avatar_url || ''}
               placeholder="Ili nalepi link profilne slike (https://...)"
+              style={{ marginTop: '0.6rem' }}
             />
           </div>
 
           <div className="form-group" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.2rem', marginTop: '1.2rem' }}>
-            <label htmlFor="coverFile">Pozadinska slika / Cover (Otpremi sa računara)</label>
-            {profile?.cover_url && (
-              <div style={{ marginBottom: '0.8rem' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={profile.cover_url}
-                  alt="Trenutni cover"
-                  style={{ width: '100%', height: '90px', borderRadius: '8px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.15)' }}
-                />
-              </div>
-            )}
-            <input
-              type="file"
+            <ImageUploadInput
               id="coverFile"
               name="coverFile"
-              accept="image/*"
-              style={{ width: '100%', padding: '0.7rem 1rem', backgroundColor: '#000', color: 'var(--text-light)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', marginBottom: '0.6rem' }}
+              label="Pozadinska slika / Cover (Otpremi sa računara ili telefona)"
+              initialPreview={profile?.cover_url}
             />
             <input
               type="url"
@@ -108,12 +87,15 @@ export default async function EditProfilePage() {
               name="coverUrl"
               defaultValue={profile?.cover_url || ''}
               placeholder="Ili nalepi link pozadinske slike (https://...)"
+              style={{ marginTop: '0.6rem' }}
             />
           </div>
 
-          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1.5rem', padding: '1rem' }}>
-            Sačuvaj izmene
-          </button>
+          <SubmitButton
+            label="Sačuvaj izmene"
+            pendingLabel="Čuvanje profila u toku..."
+            style={{ width: '100%', marginTop: '1.5rem', padding: '1rem' }}
+          />
         </form>
       </div>
     </div>

@@ -2,14 +2,16 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
+import { ensureProfileExists } from '@/utils/supabase/ensureProfile'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -18,12 +20,18 @@ export async function login(formData: FormData) {
     redirect('/login?message=' + encodeURIComponent('Pogrešan email ili lozinka.'))
   }
 
+  if (data.user) {
+    await ensureProfileExists(supabase, data.user)
+  }
+
   revalidatePath('/', 'layout')
   redirect('/')
 }
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
+  const headersList = await headers()
+  const origin = headersList.get('origin') || 'https://artkvart.vercel.app'
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const fullName = formData.get('fullName') as string
@@ -32,6 +40,7 @@ export async function signup(formData: FormData) {
     email,
     password,
     options: {
+      emailRedirectTo: `${origin}/auth/callback`,
       data: {
         full_name: fullName,
         avatar_url: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop'
@@ -42,6 +51,10 @@ export async function signup(formData: FormData) {
   if (error) {
     console.error('Greška pri registraciji u bazi:', error)
     redirect('/login?mode=signup&message=' + encodeURIComponent('Greška pri registraciji: ' + error.message))
+  }
+
+  if (data.user) {
+    await ensureProfileExists(supabase, data.user)
   }
 
   revalidatePath('/', 'layout')

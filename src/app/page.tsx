@@ -2,10 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string; q?: string }> }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string; q?: string; sort?: string }> }) {
   const resolvedParams = await searchParams;
   const currentCategory = resolvedParams.category;
   const searchQuery = resolvedParams.q?.trim();
+  const sortMode = resolvedParams.sort || 'latest';
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -20,8 +21,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
         username,
         avatar_url
       )
-    `)
-    .order('created_at', { ascending: false });
+    `);
+
+  if (sortMode === 'popular') {
+    query = query.order('likes_count', { ascending: false }).order('created_at', { ascending: false });
+  } else {
+    query = query.order('created_at', { ascending: false });
+  }
 
   if (currentCategory) {
     query = query.eq('category', currentCategory);
@@ -157,19 +163,48 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
       )}
 
       <section className="gallery-section">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0 }}>
             {searchQuery
               ? `Rezultati radova za: "${searchQuery}"`
               : currentCategory
                 ? `Radovi iz kategorije: ${currentCategory}`
-                : 'Novi Radovi (Iz Baze)'}
+                : sortMode === 'popular'
+                  ? 'Najpopularniji Radovi'
+                  : 'Novi Radovi'}
           </h2>
-          {searchQuery && (
-            <Link href="/" className="btn-dark" style={{ textDecoration: 'none', fontSize: '0.85rem' }}>
-              Poništi pretragu ✕
-            </Link>
-          )}
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {searchQuery ? (
+              <Link href="/" className="btn-dark" style={{ textDecoration: 'none', fontSize: '0.85rem' }}>
+                Poništi pretragu ✕
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href={currentCategory ? `/?category=${encodeURIComponent(currentCategory)}&sort=latest` : '/?sort=latest'}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <button
+                    className={`btn-dark ${sortMode !== 'popular' ? 'all-channels-btn active' : ''}`}
+                    style={{ fontSize: '0.82rem', padding: '0.4rem 0.85rem' }}
+                  >
+                    Najnovije
+                  </button>
+                </Link>
+                <Link
+                  href={currentCategory ? `/?category=${encodeURIComponent(currentCategory)}&sort=popular` : '/?sort=popular'}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <button
+                    className={`btn-dark ${sortMode === 'popular' ? 'all-channels-btn active' : ''}`}
+                    style={{ fontSize: '0.82rem', padding: '0.4rem 0.85rem' }}
+                  >
+                    Najpopularnije
+                  </button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
         <div className="gallery-grid">
           {artworks && artworks.length > 0 ? (

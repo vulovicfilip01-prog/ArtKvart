@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { ensureProfileExists } from '@/utils/supabase/ensureProfile'
 import { revalidatePath } from 'next/cache'
 
 export async function toggleFollow(artistId: string) {
@@ -8,6 +9,8 @@ export async function toggleFollow(artistId: string) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user || user.id === artistId) return
+
+  await ensureProfileExists(supabase, user)
 
   // Proveri da li follow već postoji
   const { data: existingFollow } = await supabase

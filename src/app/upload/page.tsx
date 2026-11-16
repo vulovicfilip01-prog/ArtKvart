@@ -1,6 +1,8 @@
 import { uploadArtwork } from './actions'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import SubmitButton from '@/components/SubmitButton'
+import ImageUploadInput from '@/components/ImageUploadInput'
 
 export default async function UploadPage() {
   const supabase = await createClient();
@@ -43,10 +45,13 @@ export default async function UploadPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="file">Slika (Otpremi fajl sa računara)</label>
-            <input type="file" id="file" name="file" accept="image/*" style={{ width: '100%', padding: '0.8rem 1rem', backgroundColor: '#000', color: 'var(--text-light)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer' }} />
+            <ImageUploadInput
+              id="file"
+              name="file"
+              label="Slika (Otpremi fajl sa računara ili telefona)"
+            />
             <small style={{color: 'var(--text-muted)', display: 'block', marginTop: '0.5rem', lineHeight: '1.4'}}>
-              *Preporučeno: Izaberite pravu sliku sa Vašeg računara.
+              *Maksimalna veličina fajla je 10MB.
             </small>
           </div>
 
@@ -55,9 +60,11 @@ export default async function UploadPage() {
             <input type="url" id="imageUrl" name="imageUrl" placeholder="https://..." />
           </div>
 
-          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1.5rem', padding: '1rem', fontSize: '1rem' }}>
-            Objavi Rad na Profilu
-          </button>
+          <SubmitButton
+            label="Objavi Rad na Profilu"
+            pendingLabel="Otpremanje slike u toku..."
+            style={{ width: '100%', marginTop: '1.5rem', padding: '1rem', fontSize: '1rem' }}
+          />
         </form>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { ensureProfileExists } from '@/utils/supabase/ensureProfile'
 import { revalidatePath } from 'next/cache'
 
 export async function createJob(formData: FormData) {
@@ -8,6 +9,8 @@ export async function createJob(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return
+
+  await ensureProfileExists(supabase, user)
 
   const title = formData.get('title') as string
   const company = formData.get('company') as string

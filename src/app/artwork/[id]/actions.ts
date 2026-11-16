@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { ensureProfileExists } from '@/utils/supabase/ensureProfile'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -9,6 +10,8 @@ export async function toggleLike(artworkId: string) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return
+
+  await ensureProfileExists(supabase, user)
 
   // Proveri da li lajk već postoji
   const { data: existingLike } = await supabase
@@ -45,6 +48,8 @@ export async function postComment(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return
+
+  await ensureProfileExists(supabase, user)
 
   const artworkId = formData.get('artworkId') as string
   const content = formData.get('content') as string
