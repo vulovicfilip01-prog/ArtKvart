@@ -8,13 +8,19 @@ export default function ContactModalButton({
   artistName,
   username,
   location,
-  category
+  category,
+  buttonLabel = 'Kontaktiraj',
+  buttonClassName = 'btn-dark',
+  defaultSubject = ''
 }: {
   artistId: string
   artistName: string
   username?: string | null
   location?: string | null
   category?: string | null
+  buttonLabel?: string
+  buttonClassName?: string
+  defaultSubject?: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [sent, setSent] = useState(false)
@@ -33,8 +39,8 @@ export default function ContactModalButton({
 
   return (
     <>
-      <button onClick={() => setIsOpen(true)} className="btn-dark">
-        Kontaktiraj
+      <button onClick={() => setIsOpen(true)} className={buttonClassName}>
+        {buttonLabel}
       </button>
 
       {isOpen && (
@@ -139,6 +145,7 @@ export default function ContactModalButton({
                     name="subject"
                     type="text"
                     required
+                    defaultValue={defaultSubject}
                     placeholder="Npr. Saradnja na projektu / Narudžbina rada"
                   />
                 </div>

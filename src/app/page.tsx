@@ -212,6 +212,24 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
               <Link href={`/artwork/${art.id}`} key={art.id} className="art-card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={art.image_url} alt={art.title} className="art-image" />
+                {art.price && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      backgroundColor: 'rgba(0,0,0,0.78)',
+                      color: '#2ecc71',
+                      border: '1px solid rgba(46, 204, 113, 0.4)',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '14px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {art.price}
+                  </div>
+                )}
                 
                 <div className="art-info">
                   <div className="art-title">{art.title}</div>

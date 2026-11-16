@@ -11,6 +11,7 @@ export default function EditArtworkModal({
     title: string
     category?: string | null
     description?: string | null
+    price?: string | null
   }
 }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -127,6 +128,17 @@ export default function EditArtworkModal({
                     fontFamily: 'inherit',
                     resize: 'vertical'
                   }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-price">Cena rada – ako je na prodaju (Opciono)</label>
+                <input
+                  id="edit-price"
+                  name="price"
+                  type="text"
+                  defaultValue={artwork.price || ''}
+                  placeholder="Npr. 120€ (ostavite prazno ako nije na prodaju)"
                 />
               </div>
 

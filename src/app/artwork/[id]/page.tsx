@@ -8,6 +8,8 @@ import FollowButton from '@/components/FollowButton';
 import DeleteArtworkButton from '@/components/DeleteArtworkButton';
 import EditArtworkModal from '@/components/EditArtworkModal';
 import ShareButton from '@/components/ShareButton';
+import ArtworkLightbox from '@/components/ArtworkLightbox';
+import ContactModalButton from '@/components/ContactModalButton';
 import { postComment, deleteComment } from './actions';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -87,19 +89,31 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
   await supabase.from('artworks').update({ views_count: views }).eq('id', artworkId);
   const isOwner = user?.id === artwork.profiles.id;
 
+  // Dohvati još radova istog umetnika
+  const { data: moreByArtist } = await supabase
+    .from('artworks')
+    .select('id, title, image_url, price, likes_count')
+    .eq('artist_id', artwork.profiles.id)
+    .neq('id', artworkId)
+    .order('created_at', { ascending: false })
+    .limit(4);
+
+  // Dohvati slične radove iz iste kategorije
+  const { data: similarArtworks } = await supabase
+    .from('artworks')
+    .select('id, title, image_url, price, profiles(full_name)')
+    .eq('category', artwork.category)
+    .neq('id', artworkId)
+    .order('likes_count', { ascending: false })
+    .limit(4);
+
   return (
-    <main className="main-content" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+    <main className="main-content">
+      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
       
-      {/* Left side: Artwork Image */}
+      {/* Left side: Artwork Image with Full-Screen Lightbox */}
       <div style={{ flex: '1 1 0%', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', backgroundColor: '#000', borderRadius: '12px', overflow: 'hidden' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src={artwork.image_url} 
-            alt={artwork.title} 
-            style={{ maxWidth: '100%', maxHeight: '85vh', objectFit: 'contain' }}
-          />
-        </div>
+        <ArtworkLightbox src={artwork.image_url} alt={artwork.title} />
       </div>
 
       {/* Right side: Sidebar Info */}
@@ -165,7 +179,37 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
         {/* Artwork Info */}
         <div>
           <h2 style={{ fontSize: '1.3rem', margin: '0 0 0.8rem 0', color: 'var(--text-light)', fontWeight: 700 }}>{artwork.title}</h2>
-          <span className="profile-badge" style={{ marginBottom: '1rem', display: 'inline-block' }}>{artwork.category}</span>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <span className="profile-badge">{artwork.category}</span>
+            {artwork.price && (
+              <span
+                style={{
+                  backgroundColor: 'rgba(46, 204, 113, 0.15)',
+                  color: '#2ecc71',
+                  border: '1px solid rgba(46, 204, 113, 0.35)',
+                  padding: '0.2rem 0.8rem',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                }}
+              >
+                Na prodaju • {artwork.price}
+              </span>
+            )}
+          </div>
+          {artwork.price && !isOwner && (
+            <div style={{ marginBottom: '1rem' }}>
+              <ContactModalButton
+                artistId={artwork.profiles.id}
+                artistName={artwork.profiles.full_name || 'Umetnik'}
+                username={artwork.profiles.username}
+                category={artwork.profiles.category}
+                buttonLabel={`Kupi / Upit za rad (${artwork.price})`}
+                buttonClassName="btn-primary"
+                defaultSubject={`Upit za kupovinu rada: ${artwork.title} (${artwork.price})`}
+              />
+            </div>
+          )}
           <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>
             {artwork.description || 'Umetnik nije dodao opis za ovaj rad.'}
           </p>
@@ -225,6 +269,57 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
         </div>
 
       </div>
+      </div>
+
+      {/* More by this artist */}
+      {moreByArtist && moreByArtist.length > 0 && (
+        <section style={{ marginTop: '3.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '1.3rem', color: 'var(--text-light)', fontWeight: 700 }}>
+              Više radova od umetnika {artwork.profiles.full_name}
+            </h3>
+            <Link href={`/artist/${artwork.profiles.id}`} style={{ color: 'var(--primary-color)', fontSize: '0.9rem', fontWeight: 600 }}>
+              Ceo portfolio →
+            </Link>
+          </div>
+          <div className="gallery-grid">
+            {moreByArtist.map((item) => (
+              <Link href={`/artwork/${item.id}`} key={item.id} className="art-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.image_url} alt={item.title} className="art-image" />
+                <div className="art-info">
+                  <div className="art-title">{item.title}</div>
+                  {item.price && <div style={{ color: '#2ecc71', fontSize: '0.8rem', fontWeight: 600 }}>Na prodaju • {item.price}</div>}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Similar Artworks in Category */}
+      {similarArtworks && similarArtworks.length > 0 && (
+        <section style={{ marginTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '2rem' }}>
+          <h3 style={{ fontSize: '1.3rem', color: 'var(--text-light)', fontWeight: 700, marginBottom: '1rem' }}>
+            Slični radovi iz kategorije: {artwork.category}
+          </h3>
+          <div className="gallery-grid">
+            {similarArtworks.map((item) => (
+              <Link href={`/artwork/${item.id}`} key={item.id} className="art-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.image_url} alt={item.title} className="art-image" />
+                <div className="art-info">
+                  <div className="art-title">{item.title}</div>
+                  <div className="art-artist">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {(item.profiles as any)?.full_name || 'Umetnik'}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

@@ -95,18 +95,32 @@ export async function updateArtwork(formData: FormData) {
   const title = formData.get('title') as string
   const category = formData.get('category') as string
   const description = formData.get('description') as string
+  const price = ((formData.get('price') as string) || '').trim()
 
   if (!artworkId || !title?.trim()) return
 
-  await supabase
+  const { error } = await supabase
     .from('artworks')
     .update({
       title: title.trim(),
       category,
-      description: description || ''
+      description: description || '',
+      price: price || null
     })
     .eq('id', artworkId)
     .eq('artist_id', user.id)
+
+  if (error) {
+    await supabase
+      .from('artworks')
+      .update({
+        title: title.trim(),
+        category,
+        description: description || ''
+      })
+      .eq('id', artworkId)
+      .eq('artist_id', user.id)
+  }
 
   revalidatePath(`/artwork/${artworkId}`)
   revalidatePath(`/artist/${user.id}`)

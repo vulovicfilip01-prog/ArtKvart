@@ -52,7 +52,16 @@ export async function updateProfile(formData: FormData) {
     }
   }
 
-  const updates = {
+  const rawInstagram = ((formData.get('instagramUrl') as string) || '').trim()
+  const instagramUrl = rawInstagram
+    ? rawInstagram.startsWith('http')
+      ? rawInstagram
+      : `https://instagram.com/${rawInstagram.replace(/^@/, '')}`
+    : ''
+  const websiteUrl = ((formData.get('websiteUrl') as string) || '').trim()
+  const availableForWork = formData.get('availableForWork') === 'on'
+
+  const baseUpdates = {
     id: user.id,
     full_name: formData.get('fullName') as string,
     username: formData.get('username') as string,
@@ -63,10 +72,16 @@ export async function updateProfile(formData: FormData) {
     cover_url: finalCoverUrl,
   }
 
-  const { error } = await supabase.from('profiles').upsert(updates)
+  const { error } = await supabase.from('profiles').upsert({
+    ...baseUpdates,
+    instagram_url: instagramUrl || null,
+    website_url: websiteUrl || null,
+    available_for_work: availableForWork,
+  })
 
   if (error) {
-    console.error('Greška pri ažuriranju profila:', error)
+    // Fallback ako nove kolone još nisu dodate u bazu
+    await supabase.from('profiles').upsert(baseUpdates)
   }
 
   // Osveži rutu korisničkog profila da bi se videle promene

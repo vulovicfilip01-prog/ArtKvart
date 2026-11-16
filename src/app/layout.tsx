@@ -38,6 +38,15 @@ export default async function RootLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  let messagesCount = 0;
+  if (user) {
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', user.id);
+    messagesCount = count || 0;
+  }
+
   return (
     <html lang="sr" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
@@ -73,8 +82,22 @@ export default async function RootLayout({
                 <Link href="/upload" className="btn-primary" style={{ textDecoration: 'none', padding: '0.4rem 1rem', fontSize: '0.85rem' }}>
                   <span style={{marginRight: '5px'}}>+</span> Objavi Rad
                 </Link>
-                <Link href="/inbox" className="btn-dark" style={{ textDecoration: 'none', padding: '0.4rem 0.85rem', fontSize: '0.85rem' }}>
+                <Link href="/inbox" className="btn-dark" style={{ textDecoration: 'none', padding: '0.4rem 0.85rem', fontSize: '0.85rem', gap: '0.4rem' }}>
                   Poruke
+                  {messagesCount > 0 && (
+                    <span
+                      style={{
+                        backgroundColor: 'var(--primary-color)',
+                        color: '#fff',
+                        borderRadius: '10px',
+                        padding: '0.05rem 0.45rem',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {messagesCount}
+                    </span>
+                  )}
                 </Link>
                 <Link href={`/artist/${user.id}`} style={{ color: 'var(--text-light)', fontWeight: 600, fontSize: '0.95rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1rem', textDecoration: 'none' }}>
                    {user.user_metadata?.full_name || user.email}

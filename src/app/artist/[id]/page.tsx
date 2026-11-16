@@ -121,13 +121,52 @@ export default async function ArtistProfile({ params }: { params: Promise<{ id: 
         </div>
 
         <div className="profile-details">
-          <h1 className="profile-name">{profile.full_name || 'Korisnik bez imena'}</h1>
-          <p className="profile-handle">@{profile.username || 'umetnik'} • {profile.location || 'Nepoznata lokacija'}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+            <h1 className="profile-name" style={{ marginBottom: 0 }}>{profile.full_name || 'Korisnik bez imena'}</h1>
+            {profile.available_for_work !== false && (
+              <span
+                style={{
+                  backgroundColor: 'rgba(46, 204, 113, 0.14)',
+                  color: '#2ecc71',
+                  border: '1px solid rgba(46, 204, 113, 0.35)',
+                  padding: '0.2rem 0.75rem',
+                  borderRadius: '20px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                }}
+              >
+                ● Dostupan za saradnju
+              </span>
+            )}
+          </div>
+          <p className="profile-handle" style={{ marginTop: '0.3rem' }}>@{profile.username || 'umetnik'} • {profile.location || 'Nepoznata lokacija'}</p>
           <p className="profile-bio">{profile.bio || 'Ovaj umetnik još uvek nije dodao biografiju.'}</p>
-          <div className="profile-stats">
+          <div className="profile-stats" style={{ flexWrap: 'wrap' }}>
             <span><strong>{profile.followers_count || 0}</strong> Pratilaca</span>
             <span><strong>{profile.following_count || 0}</strong> Prati</span>
             {profile.category && <span className="profile-badge">{profile.category}</span>}
+            {profile.instagram_url && (
+              <a
+                href={profile.instagram_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-dark"
+                style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', textDecoration: 'none' }}
+              >
+                Instagram ↗
+              </a>
+            )}
+            {profile.website_url && (
+              <a
+                href={profile.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-dark"
+                style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', textDecoration: 'none' }}
+              >
+                Sajt / Portfolio ↗
+              </a>
+            )}
           </div>
         </div>
 

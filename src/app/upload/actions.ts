@@ -20,6 +20,7 @@ export async function uploadArtwork(formData: FormData) {
   const title = formData.get('title') as string
   const category = formData.get('category') as string
   const description = formData.get('description') as string
+  const price = ((formData.get('price') as string) || '').trim()
   const file = formData.get('file') as File | null
   let finalImageUrl = formData.get('imageUrl') as string
 
@@ -51,12 +52,19 @@ export async function uploadArtwork(formData: FormData) {
     title: title,
     category: category,
     description: description,
-    image_url: finalImageUrl
+    image_url: finalImageUrl,
+    price: price || null
   })
 
   if (error) {
-    console.error('Greška pri objavi rada:', error)
-    // Ovde možemo vratiti error na stranicu, ali za sada samo redirect
+    // Fallback ako kolona price još nije dodata u Supabase tabelu
+    await supabase.from('artworks').insert({
+      artist_id: user.id,
+      title: title,
+      category: category,
+      description: description,
+      image_url: finalImageUrl
+    })
   }
 
   // Osvežavamo početnu stranu da bi se video novi rad

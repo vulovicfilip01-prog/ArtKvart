@@ -45,6 +45,11 @@ export default async function UploadPage() {
           </div>
 
           <div className="form-group">
+            <label htmlFor="price">Cena rada – ako je na prodaju (Opciono)</label>
+            <input type="text" id="price" name="price" placeholder="Npr. 120€ / Print 35€ (ostavite prazno ako nije na prodaju)" />
+          </div>
+
+          <div className="form-group">
             <ImageUploadInput
               id="file"
               name="file"

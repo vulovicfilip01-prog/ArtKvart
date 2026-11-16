@@ -56,6 +56,29 @@ export default async function EditProfilePage() {
             <textarea id="bio" name="bio" rows={4} defaultValue={profile?.bio || ''} style={{ width: '100%', padding: '0.8rem', backgroundColor: '#000', color: 'var(--text-light)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', resize: 'vertical', outline: 'none' }} placeholder="Napišite nešto o sebi i svom iskustvu..."></textarea>
           </div>
 
+          <div className="form-group">
+            <label htmlFor="instagramUrl">Instagram profil (Link ili @korisnicko_ime)</label>
+            <input type="text" id="instagramUrl" name="instagramUrl" defaultValue={profile?.instagram_url || ''} placeholder="npr. https://instagram.com/tvoj_profil ili @tvoj_profil" />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="websiteUrl">Lični sajt / Portfolio link (Opciono)</label>
+            <input type="url" id="websiteUrl" name="websiteUrl" defaultValue={profile?.website_url || ''} placeholder="https://..." />
+          </div>
+
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', backgroundColor: 'var(--surface-color)', padding: '0.9rem 1rem', borderRadius: '8px' }}>
+            <input
+              type="checkbox"
+              id="availableForWork"
+              name="availableForWork"
+              defaultChecked={profile?.available_for_work !== false}
+              style={{ width: '18px', height: '18px', accentColor: '#2ecc71', cursor: 'pointer' }}
+            />
+            <label htmlFor="availableForWork" style={{ marginBottom: 0, cursor: 'pointer', color: 'var(--text-light)', fontWeight: 600 }}>
+              ● Dostupan/na sam za freelance projekte, narudžbine i zakazivanje termina
+            </label>
+          </div>
+
           <div className="form-group" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.2rem', marginTop: '1.2rem' }}>
             <ImageUploadInput
               id="avatarFile"
