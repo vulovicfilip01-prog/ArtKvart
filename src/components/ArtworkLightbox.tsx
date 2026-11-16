@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 
+const FALLBACK_ART_IMAGE =
+  'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=900&auto=format&fit=crop'
+
 export default function ArtworkLightbox({
   src,
   alt
@@ -9,6 +12,9 @@ export default function ArtworkLightbox({
   src: string
   alt: string
 }) {
+  const isInvalidPageUrl =
+    !src || src.startsWith('https://unsplash.com/photos/') || src.startsWith('http://unsplash.com/photos/')
+  const [imgSrc, setImgSrc] = useState<string>(isInvalidPageUrl ? FALLBACK_ART_IMAGE : src)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -39,8 +45,11 @@ export default function ArtworkLightbox({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={src}
+          src={imgSrc}
           alt={alt}
+          onError={() => {
+            if (imgSrc !== FALLBACK_ART_IMAGE) setImgSrc(FALLBACK_ART_IMAGE)
+          }}
           style={{ maxWidth: '100%', maxHeight: '85vh', objectFit: 'contain' }}
         />
         <div
@@ -111,7 +120,7 @@ export default function ArtworkLightbox({
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={src}
+            src={imgSrc}
             alt={alt}
             onClick={(e) => e.stopPropagation()}
             style={{

@@ -21,6 +21,7 @@ export async function uploadArtwork(formData: FormData) {
   const category = formData.get('category') as string
   const description = formData.get('description') as string
   const price = ((formData.get('price') as string) || '').trim()
+  const tools = ((formData.get('tools') as string) || '').trim()
   const file = formData.get('file') as File | null
   let finalImageUrl = formData.get('imageUrl') as string
 
@@ -53,11 +54,12 @@ export async function uploadArtwork(formData: FormData) {
     category: category,
     description: description,
     image_url: finalImageUrl,
-    price: price || null
+    price: price || null,
+    tools: tools || null
   })
 
   if (error) {
-    // Fallback ako kolona price još nije dodata u Supabase tabelu
+    // Fallback ako kolone price ili tools još nisu dodate u Supabase tabelu
     await supabase.from('artworks').insert({
       artist_id: user.id,
       title: title,

@@ -67,6 +67,9 @@ export default function MobileMenu({
             <Link href="/artists" onClick={() => setIsOpen(false)} className="mobile-nav-link">
               Pronađi talente
             </Link>
+            <Link href="/shop" onClick={() => setIsOpen(false)} className="mobile-nav-link">
+              Prodavnica
+            </Link>
             <Link href="/jobs" onClick={() => setIsOpen(false)} className="mobile-nav-link">
               Karijera i Oglasi
             </Link>

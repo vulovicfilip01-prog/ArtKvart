@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import SafeArtImage from '@/components/SafeArtImage'
 
 interface ArtworkItem {
   id: string
@@ -77,8 +78,7 @@ export default function ArtistProfileTabs({
           {artworks && artworks.length > 0 ? (
             artworks.map((art) => (
               <Link href={`/artwork/${art.id}`} key={art.id} className="art-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={art.image_url} alt={art.title || 'Art'} className="art-image" />
+                <SafeArtImage src={art.image_url} alt={art.title || 'Art'} className="art-image" />
                 {art.price && (
                   <div
                     style={{
@@ -116,8 +116,7 @@ export default function ArtistProfileTabs({
           {likedArtworks && likedArtworks.length > 0 ? (
             likedArtworks.map((art) => (
               <Link href={`/artwork/${art.id}`} key={art.id} className="art-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={art.image_url} alt={art.title || 'Art'} className="art-image" />
+                <SafeArtImage src={art.image_url} alt={art.title || 'Art'} className="art-image" />
                 {art.price && (
                   <div
                     style={{

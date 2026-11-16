@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
+import SafeArtImage from '@/components/SafeArtImage';
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string; q?: string; sort?: string }> }) {
   const resolvedParams = await searchParams;
@@ -51,9 +52,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
   }
 
   const featured = [
-    { id: 1, title: 'Cyberpunk Beograd 2077', subtitle: 'Zaroni u futuristički svet našeg najnovijeg Art Blasta', image: 'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=1200&auto=format&fit=crop' },
-    { id: 2, title: 'Slavenska Mitologija', subtitle: 'Globalni dizajn likova i koncept art', image: 'https://images.unsplash.com/photo-1683398327267-336c1e556f85?q=80&w=1200&auto=format&fit=crop' },
-    { id: 3, title: 'Japanski Zmaj - Tetovaža', subtitle: 'Proces izrade majstorskog dela na koži', image: 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=1200&auto=format&fit=crop' },
+    { id: 1, title: 'Cyberpunk Beograd 2077', subtitle: 'Zaroni u futuristički svet digitalne umetnosti', category: 'Digitalna Umetnost', image: 'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=1200&auto=format&fit=crop' },
+    { id: 2, title: 'Tradicionalno Slikarstvo i Koncept', subtitle: 'Otkrijte autentične radove na platnu i papiru', category: 'Tradicionalna', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1200&auto=format&fit=crop' },
+    { id: 3, title: 'Majstori Tetovaža', subtitle: 'Proces izrade vrhunskih dela na koži', category: 'Tetovaže', image: 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=1200&auto=format&fit=crop' },
   ];
 
   const categories = [
@@ -86,14 +87,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
 
           <section className="featured-carousel">
             {featured.map((item) => (
-              <div key={item.id} className="featured-card">
+              <Link href={`/?category=${encodeURIComponent(item.category)}`} key={item.id} className="featured-card" style={{ textDecoration: 'none' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.image} alt={item.title} />
                 <div className="featured-content">
                   <h2>{item.title}</h2>
                   <p>{item.subtitle}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </section>
         </>
@@ -210,8 +211,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
           {artworks && artworks.length > 0 ? (
             artworks.map((art) => (
               <Link href={`/artwork/${art.id}`} key={art.id} className="art-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={art.image_url} alt={art.title} className="art-image" />
+                <SafeArtImage src={art.image_url} alt={art.title} className="art-image" />
                 {art.price && (
                   <div
                     style={{

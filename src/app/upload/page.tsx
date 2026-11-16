@@ -45,6 +45,11 @@ export default async function UploadPage() {
           </div>
 
           <div className="form-group">
+            <label htmlFor="tools">Tehnika / Korišćeni alati i tagovi (Opciono, odvojeno zarezom)</label>
+            <input type="text" id="tools" name="tools" placeholder="Npr. Photoshop, Blender, Ulje na platnu, Blackwork, 3RL" />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="price">Cena rada – ako je na prodaju (Opciono)</label>
             <input type="text" id="price" name="price" placeholder="Npr. 120€ / Print 35€ (ostavite prazno ako nije na prodaju)" />
           </div>

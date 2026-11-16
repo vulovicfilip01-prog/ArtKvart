@@ -10,6 +10,7 @@ import EditArtworkModal from '@/components/EditArtworkModal';
 import ShareButton from '@/components/ShareButton';
 import ArtworkLightbox from '@/components/ArtworkLightbox';
 import ContactModalButton from '@/components/ContactModalButton';
+import SafeArtImage from '@/components/SafeArtImage';
 import { postComment, deleteComment } from './actions';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -213,6 +214,37 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
           <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginTop: '0.5rem' }}>
             {artwork.description || 'Umetnik nije dodao opis za ovaj rad.'}
           </p>
+
+          {artwork.tools && (
+            <div style={{ marginTop: '1.1rem' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.45rem', fontWeight: 600 }}>
+                TEHNIKA / KORIŠĆENI ALATI I TAGOVI:
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                {String(artwork.tools)
+                  .split(',')
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+                  .map((tool) => (
+                    <Link
+                      key={tool}
+                      href={`/?q=${encodeURIComponent(tool)}`}
+                      style={{
+                        backgroundColor: 'var(--surface-color)',
+                        color: 'var(--text-light)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        padding: '0.2rem 0.65rem',
+                        borderRadius: '6px',
+                        fontSize: '0.78rem',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      #{tool}
+                    </Link>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
         
         <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
@@ -285,8 +317,7 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
           <div className="gallery-grid">
             {moreByArtist.map((item) => (
               <Link href={`/artwork/${item.id}`} key={item.id} className="art-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.image_url} alt={item.title} className="art-image" />
+                <SafeArtImage src={item.image_url} alt={item.title} className="art-image" />
                 <div className="art-info">
                   <div className="art-title">{item.title}</div>
                   {item.price && <div style={{ color: '#2ecc71', fontSize: '0.8rem', fontWeight: 600 }}>Na prodaju • {item.price}</div>}
@@ -306,8 +337,7 @@ export default async function ArtworkPage({ params }: { params: Promise<{ id: st
           <div className="gallery-grid">
             {similarArtworks.map((item) => (
               <Link href={`/artwork/${item.id}`} key={item.id} className="art-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.image_url} alt={item.title} className="art-image" />
+                <SafeArtImage src={item.image_url} alt={item.title} className="art-image" />
                 <div className="art-info">
                   <div className="art-title">{item.title}</div>
                   <div className="art-artist">

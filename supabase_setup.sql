@@ -193,8 +193,9 @@ CREATE POLICY "Users can delete their own jobs." ON jobs
   FOR DELETE USING (auth.uid() = user_id);
 
 
--- 9. Dodatne kolone za prodaju radova (price) i društvene mreže / dostupnost umetnika
+-- 9. Dodatne kolone za prodaju radova (price), tehnike/alate (tools) i društvene mreže / dostupnost umetnika
 ALTER TABLE artworks ADD COLUMN IF NOT EXISTS price TEXT;
+ALTER TABLE artworks ADD COLUMN IF NOT EXISTS tools TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS instagram_url TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS website_url TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS available_for_work BOOLEAN DEFAULT true;

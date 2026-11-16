@@ -89,3 +89,24 @@ export async function updateProfile(formData: FormData) {
   revalidatePath('/')
   redirect(`/artist/${user.id}`)
 }
+
+export async function changePassword(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Morate biti prijavljeni.' }
+  }
+
+  const newPassword = formData.get('newPassword') as string
+  if (!newPassword || newPassword.length < 6) {
+    return { error: 'Lozinka mora imati najmanje 6 karaktera.' }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { success: true }
+}

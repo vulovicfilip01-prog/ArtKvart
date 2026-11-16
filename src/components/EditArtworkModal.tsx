@@ -12,6 +12,7 @@ export default function EditArtworkModal({
     category?: string | null
     description?: string | null
     price?: string | null
+    tools?: string | null
   }
 }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -128,6 +129,17 @@ export default function EditArtworkModal({
                     fontFamily: 'inherit',
                     resize: 'vertical'
                   }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="edit-tools">Tehnika / Korišćeni alati i tagovi (odvojeno zarezom)</label>
+                <input
+                  id="edit-tools"
+                  name="tools"
+                  type="text"
+                  defaultValue={artwork.tools || ''}
+                  placeholder="Npr. Photoshop, Blender, Ulje na platnu, 3RL"
                 />
               </div>
 

@@ -96,6 +96,7 @@ export async function updateArtwork(formData: FormData) {
   const category = formData.get('category') as string
   const description = formData.get('description') as string
   const price = ((formData.get('price') as string) || '').trim()
+  const tools = ((formData.get('tools') as string) || '').trim()
 
   if (!artworkId || !title?.trim()) return
 
@@ -105,7 +106,8 @@ export async function updateArtwork(formData: FormData) {
       title: title.trim(),
       category,
       description: description || '',
-      price: price || null
+      price: price || null,
+      tools: tools || null
     })
     .eq('id', artworkId)
     .eq('artist_id', user.id)

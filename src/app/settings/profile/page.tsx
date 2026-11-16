@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { updateProfile } from './actions';
 import SubmitButton from '@/components/SubmitButton';
 import ImageUploadInput from '@/components/ImageUploadInput';
+import ChangePasswordForm from '@/components/ChangePasswordForm';
 
 export default async function EditProfilePage() {
   const supabase = await createClient();
@@ -120,6 +121,8 @@ export default async function EditProfilePage() {
             style={{ width: '100%', marginTop: '1.5rem', padding: '1rem' }}
           />
         </form>
+
+        <ChangePasswordForm />
       </div>
     </div>
   )

@@ -65,6 +65,9 @@ export default async function RootLayout({
               <Link href="/artists" className="dropdown" style={{ textDecoration: 'none' }}>
                 <span>Pronađi talente</span>
               </Link>
+              <Link href="/shop" className="dropdown" style={{ textDecoration: 'none' }}>
+                <span>Prodavnica</span>
+              </Link>
               <Link href="/jobs" className="dropdown" style={{ textDecoration: 'none' }}>
                 <span>Karijera i Oglasi</span>
               </Link>
@@ -149,6 +152,7 @@ export default async function RootLayout({
               <h4>Platforma</h4>
               <Link href="/">Istraži radove</Link>
               <Link href="/artists">Pronađi talente</Link>
+              <Link href="/shop">Prodavnica</Link>
               <Link href="/jobs">Oglasi za posao</Link>
               <Link href="/upload">Objavi rad</Link>
             </div>
